@@ -1,0 +1,12 @@
+.list-group {
+    list-style-type: none;
+}
+ 
+.list-item {
+    padding: 1rem;
+    font-size: 1.3rem;
+}
+ 
+.list-item:nth-child(odd) {
+    background-color: whitesmoke;
+}
