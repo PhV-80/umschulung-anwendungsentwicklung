@@ -1,3 +1,5 @@
+""" Praxisbeispiel 3 [Kapselung] """
+
 class Healable:
     def heal(self, amount: int):
         """ Erhöht die health des Objekts um amount. """
