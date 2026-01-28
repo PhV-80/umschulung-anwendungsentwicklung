@@ -1,7 +1,9 @@
+""" Praxisbeispiel 3 [Kapselung] """
+
 class Healable:
     def heal(self, amount: int):
         """ Erhöht die health des Objekts um amount. """
-        self.health += amount
+        self.set_health(self.get_health() + amount)
 
 class MagicUser:
     def __init__(self, mana: int = 10):
@@ -20,20 +22,46 @@ class Character:
 
     def __init__(self, name: str, health: int, power: int):
         """ Initialisiert einen Character mit Name, Leben und Kraft. """
-        self.name = name
-        self.health = health
-        self.power = power
+        self.__name = name
+        self.__health = 0
+        self.__power = 0
+
+        self.set_health(health)
+        self.set_power(power)
+
+    def get_name(self):
+        return self.__name
+
+    def get_health(self) -> int:
+        return self.__health
+
+    def get_power(self) -> int:
+        return self.__power
+
+    def set_health(self, value: int) -> None:
+        """health darf nicht kleiner als 0 werden."""
+        if value < 0:
+            self.__health = 0
+        else:
+            self.__health = value
+
+    def set_power(self, value: int) -> None:
+        """power darf nicht negativ sein."""
+        if value < 0:
+            self.__power = 0
+        else:
+            self.__power = value
 
     def receive_damage(self, damage: int):
-        """ Reduziert health um damage. Health fällt nicht unter 0. """
-        self.health -= damage
-        if self.health < 0:
-            self.health = 0
+        """Reduziert health um damage. Health fällt nicht unter 0."""
+        # Schaden ist positiv → health sinkt
+        new_health = self.get_health() - damage
+        self.set_health(new_health)
 
     def attack(self, target: "Character"):
-        """ Greift einen anderen Character an und fügt ihm Schaden zu. """
-        print(f"{self.name} attacks {target.name} for {self.power} damage.")
-        target.receive_damage(self.power)
+        """Greift einen anderen Character an und fügt ihm Schaden zu."""
+        print(f"{self.get_name()} attacks {target.get_name()} for {self.get_power()} damage.")
+        target.receive_damage(self.get_power())
 
 class Monster(Character):
     """ Monster erbt von Character und kann in Rage gehen. """
@@ -46,9 +74,9 @@ class Monster(Character):
     def rage(self, rage: bool):
         """ Wenn True: Power verdoppelt sich. Wenn False: zurück zu Original. """
         if rage:
-            self.power = self.base_power * 2
+            self.set_power(self.base_power * 2)
         else:
-            self.power = self.base_power
+            self.set_power(self.base_power)
 
 class Player(Character):
     """ Spieler erbt von Character und hat ein Level. """
@@ -56,12 +84,21 @@ class Player(Character):
     def __init__(self, name: str, level: int = 1, health: int = 3, power: int = 1):
         """ Initialisiert Player mit Standardwerten aus der Aufgabe. """
         super().__init__(name, health, power)
-        self.level = level
+        self.__level = 1
+
+    def get_level(self) -> int:
+        return self.__level
+
+    def set_level(self, value: int) -> None:
+        if value < 1:
+            self.__level = 1
+        else:
+            self.__level = value
 
     def level_up(self):
         """ Erhöht das Level um 1. """
-        self.level += 1
-        print(f"{self.name} has reached {self.level}.")
+        self.set_level(self.get_level() + 1)
+        print(f"{self.get_name()} has reached {self.get_level()}.")
 
 class Orc(Monster):
     """Orc erbt von Monster – Beispiel für Unterklassen-Spezialisierung."""
@@ -96,7 +133,16 @@ class Mage(Player):
     def __init__(self, name: str):
         """ Magier: weniger Health, mehr Power"""
         super().__init__(name, level=1, health=2, power=5)
-        self.mana = 10
+        self.__mana = 10
+
+    def get_mana(self):
+        return self.__mana
+
+    def set_mana(self, value: int) -> None:
+        if value < 0:
+            self.__mana = 0
+        else:
+            self.__mana = value
 
 class Cleric(Player):
     def __init__(self, name: str):
@@ -118,42 +164,42 @@ warrior1 = Warrior("Conan")
 mage1 = Mage("Gandalf")
 cleric1 = Cleric("Uther")
 
-print(c1.name, c1.health, c1.power)
-print(m1.name, m1.health, m1.power)
-print(player1.name, player1.health, player1.power, player1.level)
-print(warrior1.name, warrior1.health, warrior1.power, warrior1.level)
-print(mage1.name, mage1.health, mage1.power, mage1.level, mage1.mana)
-print(cleric1.name, cleric1.health, cleric1.power, cleric1.level)
-print(dwarf1.name, dwarf1.health, dwarf1.power)
-print(elf1.name, elf1.health, elf1.power)
+print(c1.get_name(), c1.get_health(), c1.get_power())
+print(m1.get_name(), m1.get_health(), m1.get_power())
+print(player1.get_name(), player1.get_health(), player1.get_power(), player1.get_level())
+print(warrior1.get_name(), warrior1.get_health(), warrior1.get_power(), warrior1.get_level())
+print(mage1.get_name(), mage1.get_health(), mage1.get_power(), mage1.get_level(), mage1.get_mana())
+print(cleric1.get_name(), cleric1.get_health(), cleric1.get_power(), cleric1.get_level())
+print(dwarf1.get_name(), dwarf1.get_health(), dwarf1.get_power())
+print(elf1.get_name(), elf1.get_health(), elf1.get_power())
 
 c1.receive_damage(5)
-print("nach Schaden: ", c1.health)
+print("nach Schaden: ", c1.get_health())
 c1.receive_damage(10)
-print("nicht unter 0: ", c1.health)
+print("nicht unter 0: ", c1.get_health())
 
 m1.rage(True)
-print(f"{m1.name} wütend: ", m1.power)
+print(f"{m1.get_name()} wütend: ", m1.get_power())
 m1.rage(False)
-print(f"{m1.name} ruhig: ", m1.power)
+print(f"{m1.get_name()} ruhig: ", m1.get_power())
 
 player1.level_up()
 
-print("Vor Angriff: ", m1.health)
+print("Vor Angriff: ", m1.get_health())
 player1.attack(m1)
-print("Nach Angriff: ", m1.health)
+print("Nach Angriff: ", m1.get_health())
 
-print(f"Gegner: {orc1.name}, HP: {orc1.health}, Power: {orc1.power}")
+print(f"Gegner: {orc1.get_name()}, HP: {orc1.get_health()}, Power: {orc1.get_power()}")
 orc1.rage(True)
-print(f"Ork wütend - Power: {orc1.power}")
+print(f"Ork wütend - Power: {orc1.get_power()}")
 player1.attack(orc1)
-print(f"Nach Angriff - {orc1.name} HP: {orc1.health}")
+print(f"Nach Angriff - {orc1.get_name()} HP: {orc1.get_health()}")
 
-print(f"Boss: {boss01.name}, HP: {boss01.health}, Power: {boss01.power}, Mana: {boss01.mana}")
+print(f"Boss: {boss01.get_name()}, HP: {boss01.get_health()}, Power: {boss01.get_power()}, Mana: {boss01.mana}")
 boss01.receive_damage(10)
-print(f"Nach Schaden: {boss01.health}")
+print(f"Nach Schaden: {boss01.get_health()}")
 boss01.heal(5)
-print(f"Nach Heilung: {boss01.health}")
+print(f"Nach Heilung: {boss01.get_health()}")
 boss01.cast_spell(player1, cost=5, damage=3)
 print(f"Boss-Mana nach Zauber: {boss01.mana}")
-print(f"Player-HP nach Zauber: {player1.health}")
+print(f"Player-HP nach Zauber: {player1.get_health()}")
